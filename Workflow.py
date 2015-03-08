@@ -1,3 +1,4 @@
+import glob
 import hashlib
 import os
 import subprocess
@@ -5,6 +6,10 @@ import sys
 
 #############################################################################
 class PipelineStep(object):
+
+    """Location where temporary files are stored."""
+    CacheDirectory = ''
+
     """Base class for pipeline steps."""
     def __init__(self, name):
         self.Name = name
@@ -43,10 +48,6 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return True
 
     def NeedsUpdate(self):
-        sys.stdout.write('Checking to see if workflow step "')
-        sys.stdout.write(self.Name)
-        sys.stdout.write('" needs to be executed\n')
-
         for index in self.FileArgumentIndices:
             inputFileName = self.Arguments[index]
             sha256FileName = self._GetSHA256FileName(inputFileName)
@@ -77,8 +78,17 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         # Everything checks out, no execution needed
         return False
 
+    def ClearCache(self):
+        for index in self.FileArgumentIndices:
+            inputFileName = self.Arguments[index]
+            sha256FileName = self._GetSHA256FileName(self.Arguments[index])
+            sys.stdout.write('Removing ')
+            sys.stdout.write(sha256FileName)
+            os.remove(sha256FileName)
+
     def _GetSHA256FileName(self, fileName):
-        return self.Name + '-' + fileName + '.sha256'
+        return os.path.join(Pipeline.CacheDirectory,
+                            self.Name + '-' + fileName + '.sha256')
 
     def _ComputeSHA256(self, fileName):
         f = open(fileName, 'r').read()
@@ -107,31 +117,21 @@ class Pipeline:
 
     def Execute(self):
         for s in self._Steps:
+            sys.stdout.write('Workflow step "')
+            sys.stdout.write(s.Name)
             if (s.NeedsUpdate()):
+                sys.stdout.write('" needs to be executed\n')
                 s.Execute()
+            else:
+                sys.stdout.write('" is up-to-date\n')
 
-#############################################################################
-def main():
-    # Set up a pipeline
-    p = Pipeline()
+    def ClearCache(self):
+        sys.stdout.write('Clearing cache\n')
 
-    # Set up some workflow steps
-    c1 = CommandLineExecutablePipelineStep('FirstStep')
-    c1.ExecutableName = '/usr/bin/python'
-    c1.Arguments = ['script1.py', 'script1-input.txt', 'script1-output.txt']
-    c1.FileArgumentIndices = [0, 1] # Indices of file arguments (including python script)
-    p.AddStep(c1)
-
-    c2 = CommandLineExecutablePipelineStep('SecondStep')
-    c2.ExecutableName = '/usr/bin/python'
-    c2.Arguments = ['script2.py', 'script1-output.txt']
-    c2.FileArgumentIndices = [0, 1] # Indices of file arguments (including python script)
-    p.AddStep(c2)
-
-    # Execute the pipeline
-    p.Execute()
-
-
-#############################################################################
-if __name__ == '__main__':
-    main()
+        # Remove all SHA256 files from cache directory
+        globExpr = os.path.join(Pipeline.CacheDirectory, '*.sha256')
+        print globExpr
+        sha256Files = glob.glob(globExpr)
+        print sha256Files
+        for f in sha256Files:
+            os.remove(f)
