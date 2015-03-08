@@ -7,9 +7,6 @@ import sys
 #############################################################################
 class PipelineStep(object):
 
-    """Location where temporary files are stored."""
-    CacheDirectory = ''
-
     """Base class for pipeline steps."""
     def __init__(self, name):
         self.Name = name
@@ -87,7 +84,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
             os.remove(sha256FileName)
 
     def _GetSHA256FileName(self, fileName):
-        return os.path.join(Pipeline.CacheDirectory,
+        return os.path.join(Pipeline._CacheDirectory,
                             self.Name + '-' + fileName + '.sha256')
 
     def _ComputeSHA256(self, fileName):
@@ -129,9 +126,25 @@ class Pipeline:
         sys.stdout.write('Clearing cache\n')
 
         # Remove all SHA256 files from cache directory
-        globExpr = os.path.join(Pipeline.CacheDirectory, '*.sha256')
+        globExpr = os.path.join(Pipeline._CacheDirectory, '*.sha256')
         print globExpr
         sha256Files = glob.glob(globExpr)
         print sha256Files
         for f in sha256Files:
             os.remove(f)
+
+    """Location where temporary files are stored."""
+    _CacheDirectory = ''
+
+    @staticmethod
+    def SetCacheDirectory(directory):
+        sys.stdout.write('Setting cache directory to "')
+        sys.stdout.write(directory)
+        sys.stdout.write('"\n')
+        Pipeline._CacheDirectory = directory
+
+        # Warn if directory doesn't exit
+        if (not os.path.isdir(directory)):
+            sys.stdout.write('Cache directory "')
+            sys.stdout.write(directory)
+            sys.stdout.write('" does not exist.')

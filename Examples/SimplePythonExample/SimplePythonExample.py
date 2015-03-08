@@ -7,7 +7,7 @@ from Workflow import *
 
 #############################################################################
 def main():
-    Pipeline.CacheDirectory = '/home/cory/tmp'
+    Pipeline.SetCacheDirectory('/home/cory/tmp')
 
     # Set up a pipeline
     p = Pipeline()
