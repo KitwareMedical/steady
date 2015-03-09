@@ -142,4 +142,4 @@ class Pipeline:
 
         # Warn if directory doesn't exit
         if (not os.path.isdir(directory)):
-            sys.stdout.write('Cache directory "%s" does not exist.\n')
+            sys.stdout.write('Cache directory "%s" does not exist.\n' % directory)
