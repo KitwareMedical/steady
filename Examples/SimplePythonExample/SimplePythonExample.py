@@ -16,14 +16,14 @@ def main():
     c1 = CommandLineExecutablePipelineStep('FirstStep')
     c1.ExecutableName = '/usr/bin/python'
     c1.Arguments = ['script1.py', 'script1-input.txt', 'script1-output.txt']
-    c1.FileArgumentIndices = [0, 1] # Indices of file arguments (including python script)
+    c1.InputFiles = ['script1.py', 'script1-input.txt']
     c1.OutputFiles = ['script1-output.txt']
     p.AddStep(c1)
 
     c2 = CommandLineExecutablePipelineStep('SecondStep')
     c2.ExecutableName = '/usr/bin/python'
     c2.Arguments = ['script2.py', 'script1-output.txt']
-    c2.FileArgumentIndices = [0, 1] # Indices of file arguments (including python script)
+    c2.InputFiles = c2.Arguments
     p.AddStep(c2)
 
     # Optional argument to force execution of all pipeline steps

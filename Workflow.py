@@ -21,7 +21,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         super(CommandLineExecutablePipelineStep, self).__init__(name)
         self.ExecutableName = ''
         self.Arguments = []
-        self.FileArgumentIndices = []
+        self.InputFiles = []
         self.OutputFiles = []
 
     def Execute(self):
@@ -44,8 +44,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return True
 
     def NeedsUpdate(self):
-        for index in self.FileArgumentIndices:
-            inputFileName = self.Arguments[index]
+        for inputFileName in self.InputFiles:
             sha256FileName = self._GetSHA256FileName(inputFileName)
 
             # Need update if SHA256 file for an input file doesn't exist
@@ -77,15 +76,21 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return False
 
     def ClearCache(self):
-        for index in self.FileArgumentIndices:
-            inputFileName = self.Arguments[index]
-            sha256FileName = self._GetSHA256FileName(self.Arguments[index])
+        for inputFileName in self.InputFiles:
+            sha256FileName = self._GetSHA256FileName(inputFileName)
             sys.stdout.write('Removing %s.\n' % sha256FileName)
             os.remove(sha256FileName)
 
     def _GetSHA256FileName(self, fileName):
-        return os.path.join(Pipeline._CacheDirectory,
-                            self.Name + '-' + fileName + '.sha256')
+        fileName = os.path.join(Pipeline._CacheDirectory,
+                                self.Name + '-' + fileName.replace('/', '_') + '.sha256')
+
+        # Create the path if needed
+        directory = os.path.dirname(fileName)
+        if (not os.path.exists(directory)):
+            os.makedirs(directory)
+
+        return fileName
 
     def _ComputeSHA256(self, fileName):
         f = open(fileName, 'r').read()
@@ -93,14 +98,17 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return m.hexdigest()
 
     def _WriteSHA256Files(self):
-        for index in self.FileArgumentIndices:
+        for inputFileName in self.InputFiles:
             # Save SHA256 file
-            inputFileName = self.Arguments[index]
-            sha256FileName = self._GetSHA256FileName(self.Arguments[index])
-            shaFile = open(sha256FileName, 'w')
-            shaFile.write(self._ComputeSHA256(inputFileName))
-            shaFile.write('\n')
-            
+            sha256FileName = self._GetSHA256FileName(inputFileName)
+            print 'Saving', sha256FileName
+
+            try:
+                shaFile = open(sha256FileName, 'w')
+                shaFile.write(self._ComputeSHA256(inputFileName))
+                shaFile.write('\n')
+            except:
+                sys.stdout.write('Could not write SHA256 file "%s".\n' % sha256FileName)
 
 #############################################################################
 class Pipeline:
@@ -126,9 +134,7 @@ class Pipeline:
 
         # Remove all SHA256 files from cache directory
         globExpr = os.path.join(Pipeline._CacheDirectory, '*.sha256')
-        print globExpr
         sha256Files = glob.glob(globExpr)
-        print sha256Files
         for f in sha256Files:
             os.remove(f)
 
