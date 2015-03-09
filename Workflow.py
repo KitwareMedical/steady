@@ -22,11 +22,10 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         self.ExecutableName = ''
         self.Arguments = []
         self.FileArgumentIndices = []
+        self.OutputFiles = []
 
     def Execute(self):
-        sys.stdout.write('Executing CommandLineExecutablePipelineStep "')
-        sys.stdout.write(self.Name)
-        sys.stdout.write('"\n')
+        sys.stdout.write('Executing CommandLineExecutablePipelineStep "%s"\n' % self.Name)
         args = [self.ExecutableName] + self.Arguments
 
         try:
@@ -63,13 +62,15 @@ class CommandLineExecutablePipelineStep(PipelineStep):
                     oldSHA256 = oldSHA256Contents[0].strip()
                 newSHA256 = self._ComputeSHA256(inputFileName)
                 if (oldSHA256 != newSHA256):
-                    sys.stdout.write('-- SHA256 mismatch for input file "')
-                    sys.stdout.write(inputFileName)
-                    sys.stdout.write('". Execution needed.\n')
                     return True
             except:
                 print "Error when comparing SHA256 files."
                 print "Assuming execution of pipeline step is needed."
+                return True
+
+        for outputFile in self.OutputFiles:
+            # Need an update if any of the outputs are missing
+            if (not os.path.exists(outputFile)):
                 return True
 
         # Everything checks out, no execution needed
@@ -79,8 +80,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         for index in self.FileArgumentIndices:
             inputFileName = self.Arguments[index]
             sha256FileName = self._GetSHA256FileName(self.Arguments[index])
-            sys.stdout.write('Removing ')
-            sys.stdout.write(sha256FileName)
+            sys.stdout.write('Removing %s.\n' % sha256FileName)
             os.remove(sha256FileName)
 
     def _GetSHA256FileName(self, fileName):
@@ -114,13 +114,12 @@ class Pipeline:
 
     def Execute(self):
         for s in self._Steps:
-            sys.stdout.write('Workflow step "')
-            sys.stdout.write(s.Name)
+            sys.stdout.write('Pipeline step "%s"\n' % s.Name)
             if (s.NeedsUpdate()):
-                sys.stdout.write('" needs to be executed\n')
+                sys.stdout.write('Workflow step "%s" needs to be executed.\n' % s.Name)
                 s.Execute()
             else:
-                sys.stdout.write('" is up-to-date\n')
+                sys.stdout.write('Workflow step "%s" is up-to-date.\n' % s.Name)
 
     def ClearCache(self):
         sys.stdout.write('Clearing cache\n')
@@ -138,13 +137,9 @@ class Pipeline:
 
     @staticmethod
     def SetCacheDirectory(directory):
-        sys.stdout.write('Setting cache directory to "')
-        sys.stdout.write(directory)
-        sys.stdout.write('"\n')
+        sys.stdout.write('Setting cache directory to "%s"\n' % directory)
         Pipeline._CacheDirectory = directory
 
         # Warn if directory doesn't exit
         if (not os.path.isdir(directory)):
-            sys.stdout.write('Cache directory "')
-            sys.stdout.write(directory)
-            sys.stdout.write('" does not exist.')
+            sys.stdout.write('Cache directory "%s" does not exist.\n')

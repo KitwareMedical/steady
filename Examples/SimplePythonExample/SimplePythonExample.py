@@ -17,6 +17,7 @@ def main():
     c1.ExecutableName = '/usr/bin/python'
     c1.Arguments = ['script1.py', 'script1-input.txt', 'script1-output.txt']
     c1.FileArgumentIndices = [0, 1] # Indices of file arguments (including python script)
+    c1.OutputFiles = ['script1-output.txt']
     p.AddStep(c1)
 
     c2 = CommandLineExecutablePipelineStep('SecondStep')
