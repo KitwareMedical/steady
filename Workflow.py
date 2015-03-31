@@ -101,7 +101,6 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         for inputFileName in self.InputFiles:
             # Save SHA256 file
             sha256FileName = self._GetSHA256FileName(inputFileName)
-            print 'Saving', sha256FileName
 
             try:
                 shaFile = open(sha256FileName, 'w')
@@ -133,10 +132,12 @@ class Pipeline:
         sys.stdout.write('Clearing cache\n')
 
         # Remove all SHA256 files from cache directory
-        globExpr = os.path.join(Pipeline._CacheDirectory, '*.sha256')
-        sha256Files = glob.glob(globExpr)
-        for f in sha256Files:
-            os.remove(f)
+        #globExpr = os.path.join(Pipeline._CacheDirectory, '*.sha256')
+        #sha256Files = glob.glob(globExpr)
+        #for f in sha256Files:
+        #    os.remove(f)
+        for step in self._Steps:
+            step.ClearCache()
 
     """Location where temporary files are stored."""
     _CacheDirectory = ''
