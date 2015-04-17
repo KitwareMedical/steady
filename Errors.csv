@@ -1,43 +1,43 @@
-ScanID, has _OUTPUT.nrrd, has _LANDMARKS.txt, has _CLIPPINGS.txt, has _OUTPUT.vtp 
-1002 , No , No , No , No 
-1006 , Yes , No , Yes , Yes 
-1007 , No , No , No , No 
-1008 , No , No , No , No 
-1009 , No , No , No , No 
-1011 , No , No , No , No 
-1013 , Yes , No , Yes , Yes 
-1014 , No , No , No , No 
-1017 , No , No , No , No 
-1019 , No , No , No , No 
-1024 , Yes , No , No , Yes 
-1026 , No , No , No , No 
-1028 , No , No , No , No 
-1037 , Yes , Yes , Yes , Yes 
-1038 , No , No , No , No 
-1039 , Yes , No , Yes , Yes 
-1048 , No , No , No , No 
-1050 , No , No , No , No 
-1056 , No , No , No , No 
-1064 , No , No , No , No 
-1081 , Yes , No , Yes , Yes 
-1084 , No , No , No , No 
-1087 , No , No , No , No 
-1091 , No , No , No , No 
-1093 , No , No , No , No 
-1106 , Yes , No , Yes , Yes 
-1107 , Yes , No , Yes , Yes 
-1109 , Yes , No , Yes , Yes 
-1110 , No , No , No , No 
-1111 , No , No , No , No 
-1112 , No , No , No , No 
-1113 , Yes , No , Yes , Yes 
-1114 , No , No , No , No 
-1115 , No , No , No , No 
-1116 , No , No , No , No 
-1117 , No , No , No , No 
-1118 , No , No , No , No 
-1119 , No , No , No , No 
-1120 , No , No , No , No 
-1121 , Yes , No , Yes , Yes 
-1122 , Yes , No , Yes , Yes 
-1123 , Yes , No , Yes , Yes 
+ScanID, has _OUTPUT.nrrd, has _LANDMARKS.txt, has _CLIPPINGS.txt, has _OUTPUT.vtp, _HEATFLOW.mha, _MOUTH_REMOVED.nrrd, _MOUTH_REMOVED.vtp, _ALL_CROSS_SECTIONS.vtp 
+1002 , No , No , No , No , No , No , No , No 
+1006 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1007 , No , No , No , No , No , No , No , No 
+1008 , No , No , No , No , No , No , No , No 
+1009 , No , No , No , No , No , No , No , No 
+1011 , No , No , No , No , No , No , No , No 
+1013 , Yes , No , Yes , Yes , No , No , No , No 
+1014 , No , No , No , No , No , No , No , No 
+1017 , No , No , No , No , No , No , No , No 
+1019 , No , No , No , No , No , No , No , No 
+1024 , Yes , No , No , Yes , No , Yes , Yes , No 
+1026 , No , No , No , No , No , No , No , No 
+1028 , No , No , No , No , No , No , No , No 
+1037 , Yes , Yes , Yes , Yes , No , Yes , Yes , No 
+1038 , No , No , No , No , No , No , No , No 
+1039 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1048 , No , No , No , No , No , No , No , No 
+1050 , No , No , No , No , No , No , No , No 
+1056 , No , No , No , No , No , No , No , No 
+1064 , No , No , No , No , No , No , No , No 
+1081 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1084 , No , No , No , No , No , No , No , No 
+1087 , No , No , No , No , No , No , No , No 
+1091 , No , No , No , No , No , No , No , No 
+1093 , No , No , No , No , No , No , No , No 
+1106 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1107 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1109 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1110 , No , No , No , No , No , No , No , No 
+1111 , No , No , No , No , No , No , No , No 
+1112 , No , No , No , No , No , No , No , No 
+1113 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1114 , No , No , No , No , No , No , No , No 
+1115 , No , No , No , No , No , No , No , No 
+1116 , No , No , No , No , No , No , No , No 
+1117 , No , No , No , No , No , No , No , No 
+1118 , No , No , No , No , No , No , No , No 
+1119 , No , No , No , No , No , No , No , No 
+1120 , No , No , No , No , No , No , No , No 
+1121 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1122 , Yes , No , Yes , Yes , No , Yes , Yes , No 
+1123 , Yes , No , Yes , Yes , No , Yes , Yes , No 

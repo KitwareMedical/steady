@@ -23,7 +23,7 @@ def main():
 	output = open("ScanDataAtLandmarks.csv", 'w')
 	output.write("ScanID, TVC Cross-sectional Area, TVC Perimeter, TVC COM , Subglottic Cross-sectional Area, Subglottic Perimeter, Subglottic COM , InferriorSubglottis Cross-sectional Area, InferriorSubglottis Perimeter, InferriorSubglottis COM, MinSliceID, MinSlice Cross-sectional Area, MinSlice Perimeter, MinSlice COM, MidTrachea Cross-sectional Area, MidTrachea Perimeter, MidTrachea COM\n")
 	errors = open("Errors.csv", 'w')
-	errors.write("ScanID, has _OUTPUT.nrrd, has _LANDMARKS.txt, has _CLIPPINGS.txt, has _OUTPUT.vtp \n")
+	errors.write("ScanID, has _OUTPUT.nrrd, has _LANDMARKS.txt, has _CLIPPINGS.txt, has _OUTPUT.vtp, _HEATFLOW.mha, _MOUTH_REMOVED.nrrd, _MOUTH_REMOVED.vtp, _ALL_CROSS_SECTIONS.vtp \n")
 
 	for ScanID in xrange(start, end+1):
 
@@ -41,6 +41,10 @@ def main():
 		FileExists(folder, errors, ScanID, "_LANDMARKS.txt")
 		FileExists(folder, errors, ScanID, "_CLIPPINGS.txt")
 		FileExists(folder, errors, ScanID, "_OUTPUT.vtp")
+		FileExists(folder, errors, ScanID, "_HEATFLOW.mha")
+		FileExists(folder, errors, ScanID, "_MOUTH_REMOVED.nrrd")
+		FileExists(folder, errors, ScanID, "_MOUTH_REMOVED.vtp")
+		FileExists(folder, errors, ScanID, "_ALL_CROSS_SECTIONS.vtp")
 		errors.write("\n")
 
 	# print total, count
