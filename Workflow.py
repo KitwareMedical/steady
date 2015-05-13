@@ -29,7 +29,10 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         args = [self.ExecutableName] + self.Arguments
 
         try:
-            subprocess.call(args)
+            returnCode = subprocess.call(args)
+            if (returnCode != 0):
+              print 'Process returned error code', returnCode
+              return False
 
         except:
             print 'Failed to run command-line executable', args
