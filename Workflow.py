@@ -66,8 +66,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
                 if (oldSHA256 != newSHA256):
                     return True
             except:
-                print "Error when comparing SHA256 files."
-                print "Assuming execution of pipeline step is needed."
+                print "Error when comparing SHA256 files. Assuming execution of pipeline step is needed."
                 return True
 
         for outputFile in self.OutputFiles:
@@ -106,8 +105,13 @@ class CommandLineExecutablePipelineStep(PipelineStep):
             sha256FileName = self._GetSHA256FileName(inputFileName)
 
             try:
+              sha256Value = self._ComputeSHA256(inputFileName)
+            except:
+              sys.stdout.write('Could not compute SHA256 for file "%s"' % inputFileName)
+
+            try:
                 shaFile = open(sha256FileName, 'w')
-                shaFile.write(self._ComputeSHA256(inputFileName))
+                shaFile.write(sha256Value)
                 shaFile.write('\n')
             except:
                 sys.stdout.write('Could not write SHA256 file "%s".\n' % sha256FileName)
@@ -124,10 +128,11 @@ class Pipeline:
 
     def Execute(self):
         for s in self._Steps:
-            sys.stdout.write('Pipeline step "%s"\n' % s.Name)
             if (s.NeedsUpdate()):
                 sys.stdout.write('Workflow step "%s" needs to be executed.\n' % s.Name)
-                s.Execute()
+                success = s.Execute()
+                if (not success):
+                  break
             else:
                 sys.stdout.write('Workflow step "%s" is up-to-date.\n' % s.Name)
 
