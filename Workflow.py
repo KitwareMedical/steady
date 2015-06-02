@@ -107,7 +107,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
             try:
               sha256Value = self._ComputeSHA256(inputFileName)
             except:
-              sys.stdout.write('Could not compute SHA256 for file "%s"' % inputFileName)
+              sys.stdout.write('Could not compute SHA256 for file "%s"\n' % inputFileName)
 
             try:
                 shaFile = open(sha256FileName, 'w')
