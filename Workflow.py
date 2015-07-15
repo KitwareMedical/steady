@@ -126,11 +126,13 @@ class Pipeline:
     def AddStep(self, step):
         self._Steps.append(step)
 
-    def Execute(self):
+    def Execute(self, dryRun=False):
         for s in self._Steps:
             if (s.NeedsUpdate()):
                 sys.stdout.write('Workflow step "%s" needs to be executed.\n' % s.Name)
-                success = s.Execute()
+                success = True
+                if (not dryRun):
+                    success = s.Execute()
                 if (not success):
                   break
             else:
