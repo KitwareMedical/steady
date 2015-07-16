@@ -94,9 +94,20 @@ class CommandLineExecutablePipelineStep(PipelineStep):
 
         return fileName
 
-    def _ComputeSHA256(self, fileName):
-        f = open(fileName, 'r').read()
-        m = hashlib.sha256(f)
+    def _ComputeSHA256(self, path):
+        m = hashlib.sha256()
+        if os.path.isfile(path):
+            f = open(path, 'r').read()
+            m.update(f)
+        elif os.path.isdir(path):
+            # Compute SHA256 over all files in the directory
+            for root, dirs, files in os.walk(path):
+                files = sorted(files)
+                for fileName in files:
+                    filePath = os.path.join(root, fileName)
+                    f = open(filePath, 'r').read()
+                    m.update(f)
+
         return m.hexdigest()
 
     def _WriteSHA256Files(self):
