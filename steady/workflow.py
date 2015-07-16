@@ -7,16 +7,23 @@ import sys
 #############################################################################
 class PipelineStep(object):
 
-    """Base class for pipeline steps."""
+    """
+    Base class for pipeline steps.
+    """
     def __init__(self, name):
         self.Name = name
 
     def NeedsUpdate(self):
+        """
+        Indicates whether the pipeline step needs to be updated.
+        """
         return False
 
 #############################################################################
 class CommandLineExecutablePipelineStep(PipelineStep):
-    """Pipeline steps for a command-line executable."""
+    """
+    Pipeline steps for a command-line executable.
+    """
     def __init__(self, name):
         super(CommandLineExecutablePipelineStep, self).__init__(name)
         self.ExecutableName = ''
@@ -25,6 +32,9 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         self.OutputFiles = []
 
     def Execute(self, verbose=False):
+        """
+        Run the pipeline step.
+        """
         sys.stdout.write('Executing CommandLineExecutablePipelineStep "%s"\n' % self.Name)
         args = [self.ExecutableName] + self.Arguments
 
@@ -134,12 +144,15 @@ class CommandLineExecutablePipelineStep(PipelineStep):
 
 #############################################################################
 class Pipeline:
-    """Pipeline that defines a set of steps that should be taken to execute
-       a workflow."""
+    """
+    Pipeline that defines a set of steps that should be taken to execute
+    a workflow.
+    """
     def __init__(self):
         self._Steps = []
 
     def AddStep(self, step):
+        """Add a workflow step to the pipeline."""
         self._Steps.append(step)
 
     def Execute(self, dryRun=False, verbose=False):

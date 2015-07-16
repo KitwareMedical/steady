@@ -1,9 +1,9 @@
 import sys
 
 # Add Python path two levels up
-sys.path.append('../..')
+sys.path.append('../../')
 
-from Workflow import *
+from steady.workflow import *
 
 #############################################################################
 def main():
