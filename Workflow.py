@@ -24,9 +24,14 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         self.InputFiles = []
         self.OutputFiles = []
 
-    def Execute(self):
+    def Execute(self, verbose=False):
         sys.stdout.write('Executing CommandLineExecutablePipelineStep "%s"\n' % self.Name)
         args = [self.ExecutableName] + self.Arguments
+
+        if (verbose):
+            sys.stdout.write('Command: ')
+            sys.stdout.write(' '.join(['"%s"' % arg for arg in args]))
+            sys.stdout.write('\n')
 
         try:
             returnCode = subprocess.call(args)
@@ -137,13 +142,13 @@ class Pipeline:
     def AddStep(self, step):
         self._Steps.append(step)
 
-    def Execute(self, dryRun=False):
+    def Execute(self, dryRun=False, verbose=False):
         for s in self._Steps:
             if (s.NeedsUpdate()):
                 sys.stdout.write('Workflow step "%s" needs to be executed.\n' % s.Name)
                 success = True
                 if (not dryRun):
-                    success = s.Execute()
+                    success = s.Execute(verbose)
                 if (not success):
                   break
             else:
