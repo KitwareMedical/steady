@@ -13,10 +13,3 @@ steady.workflow module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: steady
-    :members:
-    :undoc-members:
-    :show-inheritance:

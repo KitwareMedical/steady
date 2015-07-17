@@ -56,7 +56,9 @@ class CommandLineExecutablePipelineStep(PipelineStep):
     def Execute(self, verbose=False):
         """Run the pipeline step.
 
-        :param verbose: If True, produce verbose output while running. Otherwise, minimize output.
+        :param verbose: If True, produce verbose output while running,
+        including the command that is run when this step is
+        executed. Otherwise, minimize output.
 
         """
         sys.stdout.write('Executing CommandLineExecutablePipelineStep "%s"\n' % self.Name)
@@ -126,6 +128,11 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return False
 
     def ClearCache(self):
+        """Deletes all the cached SHA256 files for this PipelineStep.
+
+        This essentially forces a re-run of the PipelineStep.
+
+        """
         filesToCheck = [self.Executable]
         filesToCheck.extend(self.InputFiles)
 
@@ -135,6 +142,9 @@ class CommandLineExecutablePipelineStep(PipelineStep):
             os.remove(sha256FileName)
 
     def _GetSHA256FileName(self, fileName):
+        """Get the file name for the cached SHA256 entry.
+
+        """
         fileName = os.path.join(Pipeline._CacheDirectory,
                                 self.Name + '-' + fileName.replace('/', '_') + '.sha256')
 
@@ -146,6 +156,15 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return fileName
 
     def _ComputeSHA256(self, path):
+        """Compute the SHA256 for a given path.
+
+        :param path: This parameter may be a directory or file. If it
+        is a directory, the SHA256 is of all the content in the files
+        in the directory hierarchy starting at this path. If it is a
+        file, it is the SHA256 of the contents of the file.
+
+        """
+
         m = hashlib.sha256()
         if os.path.isfile(path):
             f = open(path, 'r').read()
@@ -162,6 +181,9 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return m.hexdigest()
 
     def _WriteSHA256Files(self):
+        """Writes out SHA256 cache files for the Executable and the InputFiles.
+
+        """
         filesToCheck = [self.Executable]
         filesToCheck.extend(self.InputFiles)
 
@@ -170,9 +192,9 @@ class CommandLineExecutablePipelineStep(PipelineStep):
             sha256FileName = self._GetSHA256FileName(inputFileName)
 
             try:
-              sha256Value = self._ComputeSHA256(inputFileName)
+                sha256Value = self._ComputeSHA256(inputFileName)
             except:
-              sys.stdout.write('Could not compute SHA256 for file "%s"\n' % inputFileName)
+                sys.stdout.write('Could not compute SHA256 for file "%s"\n' % inputFileName)
 
             try:
                 shaFile = open(sha256FileName, 'w')
@@ -183,18 +205,27 @@ class CommandLineExecutablePipelineStep(PipelineStep):
 
 #############################################################################
 class Pipeline:
-    """
-    Pipeline that defines a set of steps that should be taken to execute
-    a workflow.
+    """Pipeline that defines a set of steps that should be taken to
+    execute a workflow.
+
     """
     def __init__(self):
         self._Steps = []
 
     def AddStep(self, step):
-        """Add a workflow step to the pipeline."""
+        """Add a workflow step to the pipeline.
+
+        """
         self._Steps.append(step)
 
     def Execute(self, dryRun=False, verbose=False):
+        """Execute each PipelineStep in the order it was added to the Pipeline
+        if needed.
+
+        :parameter dryRun: If set to True, does not actually execute the PipelineStep.
+        :parameter verbose: If set to True, tells the PipelineStep to execute verbosely.
+
+        """
         for s in self._Steps:
             if (s.NeedsUpdate()):
                 sys.stdout.write('Workflow step "%s" needs to be executed.\n' % s.Name)
@@ -207,13 +238,15 @@ class Pipeline:
                 sys.stdout.write('Workflow step "%s" is up-to-date.\n' % s.Name)
 
     def ClearCache(self):
+        """Clear the cache for all steps in the Pipeline.
+
+        Note that this will force re-execution of all steps in the
+        Pipeline.
+
+        """
         sys.stdout.write('Clearing cache\n')
 
         # Remove all SHA256 files from cache directory
-        #globExpr = os.path.join(Pipeline._CacheDirectory, '*.sha256')
-        #sha256Files = glob.glob(globExpr)
-        #for f in sha256Files:
-        #    os.remove(f)
         for step in self._Steps:
             step.ClearCache()
 
@@ -222,6 +255,9 @@ class Pipeline:
 
     @staticmethod
     def SetCacheDirectory(directory):
+        """Set the directory where the cached SHA256 files are stored.
+
+        """
         sys.stdout.write('Setting cache directory to "%s"\n' % directory)
         Pipeline._CacheDirectory = directory
 
