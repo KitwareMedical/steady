@@ -4,11 +4,33 @@ import os
 import subprocess
 import sys
 
+###############################################################################
+#
+# Library: steady
+#
+# Copyright 2010 Kitware, Inc., 28 Corporate Dr., Clifton Park, NY 12065, USA.
+# All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+###############################################################################
+
 #############################################################################
 class PipelineStep(object):
+    """Base class for pipeline steps.
 
-    """
-    Base class for pipeline steps.
+    :param name: Name of the PipelineStep. It should be unique.
+
     """
     def __init__(self, name):
         self.Name = name
@@ -21,22 +43,24 @@ class PipelineStep(object):
 
 #############################################################################
 class CommandLineExecutablePipelineStep(PipelineStep):
-    """
-    Pipeline steps for a command-line executable.
+    """Pipeline steps for a command-line executable.
+
     """
     def __init__(self, name):
         super(CommandLineExecutablePipelineStep, self).__init__(name)
-        self.ExecutableName = ''
+        self.Executable = ''
         self.Arguments = []
         self.InputFiles = []
         self.OutputFiles = []
 
     def Execute(self, verbose=False):
-        """
-        Run the pipeline step.
+        """Run the pipeline step.
+
+        :param verbose: If True, produce verbose output while running. Otherwise, minimize output.
+
         """
         sys.stdout.write('Executing CommandLineExecutablePipelineStep "%s"\n' % self.Name)
-        args = [self.ExecutableName] + self.Arguments
+        args = [self.Executable] + self.Arguments
 
         if (verbose):
             sys.stdout.write('Command: ')
@@ -62,7 +86,16 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return True
 
     def NeedsUpdate(self):
-        for inputFileName in self.InputFiles:
+        """Returns True if any of the SHA256 hashes of the current InputFiles
+        differ from the previously cached SHA256 hashes for those
+        inputs, if the SHA256 of the Executable has changed, or if any
+        of the OutputFiles are missing.
+
+        """
+        filesToCheck = [self.Executable]
+        filesToCheck.extend(self.InputFiles)
+
+        for inputFileName in filesToCheck:
             sha256FileName = self._GetSHA256FileName(inputFileName)
 
             # Need update if SHA256 file for an input file doesn't exist
@@ -93,7 +126,10 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return False
 
     def ClearCache(self):
-        for inputFileName in self.InputFiles:
+        filesToCheck = [self.Executable]
+        filesToCheck.extend(self.InputFiles)
+
+        for inputFileName in filesToCheck:
             sha256FileName = self._GetSHA256FileName(inputFileName)
             sys.stdout.write('Removing %s.\n' % sha256FileName)
             os.remove(sha256FileName)
@@ -126,7 +162,10 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return m.hexdigest()
 
     def _WriteSHA256Files(self):
-        for inputFileName in self.InputFiles:
+        filesToCheck = [self.Executable]
+        filesToCheck.extend(self.InputFiles)
+
+        for inputFileName in filesToCheck:
             # Save SHA256 file
             sha256FileName = self._GetSHA256FileName(inputFileName)
 
