@@ -4,10 +4,10 @@ steady package
 Submodules
 ----------
 
-steady.Workflow module
+steady.workflow module
 ----------------------
 
-.. automodule:: steady.Workflow
+.. automodule:: steady.workflow
     :members:
     :undoc-members:
     :show-inheritance:
