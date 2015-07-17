@@ -27,14 +27,14 @@ def main():
     p.AddStep(c2)
 
     # Optional argument to force execution of all pipeline steps
-    try:
-        sys.argv.index('--force-execute')
+    if ('--force-execute' in sys.argv):
         p.ClearCache()
-    except:
-        pass
+
+    # Optional argument for verbose execution
+    verbose = '--verbose' in sys.argv
 
     # Execute the pipeline
-    p.Execute()
+    p.Execute(verbose=verbose)
 
 
 #############################################################################
