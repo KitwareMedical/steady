@@ -46,12 +46,12 @@ class CommandLineExecutablePipelineStep(PipelineStep):
     """Pipeline steps for a command-line executable.
 
     """
-    def __init__(self, name):
+    def __init__(self, name, executable=None, inputs=[], outputs=[], args=[]):
         super(CommandLineExecutablePipelineStep, self).__init__(name)
-        self.Executable = ''
-        self.Arguments = []
-        self.InputFiles = []
-        self.OutputFiles = []
+        self.Executable = executable
+        self.InputFiles = inputs
+        self.OutputFiles = outputs
+        self.Arguments = args
 
     def Execute(self, verbose=False):
         """Run the pipeline step.
@@ -212,8 +212,8 @@ class Pipeline:
     execute a workflow.
 
     """
-    def __init__(self):
-        self._Steps = []
+    def __init__(self, steps=[]):
+        self._Steps = steps
 
     def AddStep(self, step):
         """Add a workflow step to the pipeline.
