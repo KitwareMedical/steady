@@ -254,7 +254,7 @@ class Pipeline:
             step.ClearCache()
 
     """Location where temporary files are stored."""
-    _CacheDirectory = ''
+    _CacheDirectory = '/tmp'
 
     @staticmethod
     def SetCacheDirectory(directory):
