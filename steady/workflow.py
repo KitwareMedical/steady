@@ -91,11 +91,12 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         """Returns True if any of the SHA256 hashes of the current InputFiles
         differ from the previously cached SHA256 hashes for those
         inputs, if the SHA256 of the Executable has changed, or if any
-        of the OutputFiles are missing.
+        of the OutputFiles are missing or have changed.
 
         """
         filesToCheck = [self.Executable]
         filesToCheck.extend(self.InputFiles)
+        filesToCheck.extend(self.OutputFiles)
 
         for inputFileName in filesToCheck:
             sha256FileName = self._GetSHA256FileName(inputFileName)
@@ -135,6 +136,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         """
         filesToCheck = [self.Executable]
         filesToCheck.extend(self.InputFiles)
+        filesToCheck.extend(self.OutputFiles)
 
         for inputFileName in filesToCheck:
             sha256FileName = self._GetSHA256FileName(inputFileName)
@@ -181,11 +183,12 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return m.hexdigest()
 
     def _WriteSHA256Files(self):
-        """Writes out SHA256 cache files for the Executable and the InputFiles.
+        """Writes out SHA256 cache files for the Executable, InputFiles, and OutputFiles.
 
         """
         filesToCheck = [self.Executable]
         filesToCheck.extend(self.InputFiles)
+        filesToCheck.extend(self.OutputFiles)
 
         for inputFileName in filesToCheck:
             # Save SHA256 file
