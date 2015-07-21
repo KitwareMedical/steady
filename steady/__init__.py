@@ -170,7 +170,7 @@ could be, but it isn't.
 
 """
 
-import steady.Workflow
-from steady.Workflow import Pipeline, PipelineStep, CommandLineExecutablePipelineStep
+import steady.workflow
+from steady.workflow import Pipeline, PipelineStep, CommandLineExecutablePipelineStep
 
 __version__ = '0.5.0'
