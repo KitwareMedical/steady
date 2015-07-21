@@ -26,15 +26,18 @@
 you have a series of processing steps to perform on data sets, and
 each processing step is in the form of a command-line executable.
 
-Steady follows a data-flow paradigm where one or more input files is
-transformed by a series of algorithms into one or more outputs. The
-algorithms are organized into a pipeline of workflow steps. Each step
-takes zero or more input files and produces zero or more outputs.
-Data communication between steps is dirt simple - it takes place
-through the file system.
+Steady's design is based on the assumption that your workflow involves
+of one or more input files being transformed by a series of algorithms
+into one or more intermediate and final outputs. The algorithms are
+organized into a workflow of individual steps. Each step takes zero or
+more input files and produces zero or more output files. Data
+communication between steps is dirt simple - it takes place through
+the file system. No explicit linkages between workflow steps are
+specified - all dependencies are implicit and can be resolved by
+ordering the steps appropriately.
 
-The key feature of this workflow system is that workflow steps are
-executed *only when needed*. This includes the following situations:
+The key feature of this system is that workflow steps are executed
+*only when needed*. This includes the following situations:
 
 * when any of the workflow step's output files do not exist;
 
@@ -49,10 +52,10 @@ executed *only when needed*. This includes the following situations:
 How does steady know when the inputs have changed? Upon successful
 completion of a workflow step, the SHA256 hashes for the executable,
 each input file, and each output file in the workflow step is computed
-and stored in separate cache files. The next time the workflow step
-runs with those input files and output files, the SHA256 of each of
-the files is computed and compared to the cached SHA256 for that
-file. If any of the hashes are different, the workflow step is
+and stored in a cache. The next time the workflow step runs with those
+input files and output files, the SHA256 of each of the files is
+computed and compared to the cached SHA256 for that file. If any of
+the hashes are different, the workflow step is
 re-executed. Additionally, the hash for the executable is compared to
 the cached hash for the executable, and if this has changed, the
 workflow step is recomputed. The reason for this is that changes to
@@ -67,85 +70,73 @@ copies one file to another. If the file has already been copied and
 the input file has not changed, there is no need to re-execute the
 step::
 
-  from steady.workflow import *
+  from steady import workflow as wf
 
   inputFile = '/etc/mtab'
   outputFile = 'copiedFile'
-  args = ['-v', 'P', inputFile, outputFile]
-  copyStep = CommandLineExecutablePipelineStep('CopyStep',
-                                               executable='/bin/cp',
-                                               inputs=[inputFile],
-                                               outputs=[outputFile],
-                                               args=args)
+  command = ['/bin/cp', '-v', 'P', wf.infile(inputFile), wf.outfile(outputFile)]
+  copyStep = wf.CLIWorkflowStep('CopyStep', cmd)
 
-  pipeline = Pipeline([copyStep])
+  workflow = wf.Workflow([copyStep])
 
-Here, we have set up a single ``CommandLineExecutablePipelineStep``
-and added it to a pipeline. It simply copies the mtab file that lists
-currently mounted file systems on linux to a destination file.
+Here, we have set up a single ``CLIWorkflowStep`` and added it to a
+workflow. It simply copies the mtab file that lists currently mounted
+file systems on linux to a destination file.
+
+The input and output files for this workflow step are passed to the
+functions ``workflow.infile()`` and ``workflow.outfile()``,
+respectively. These functions decorate the arguments to indicate that
+they represent input and output files and that the workflow should pay
+special attention to them. Aside from this decoration of input and
+output files, arguments to command-line executables are in the same
+form passed to ``subprocess.call()``.
 
 Let's see what happens the first time ``Execute`` is called on
-the pipeline::
+the workflow::
 
-  >>> pipeline.Execute(verbose=True)
+  >>> workflow.Execute(verbose=True)
   Workflow step "CopyStep" needs to be executed.
-  Executing CommandLineExecutablePipelineStep "CopyStep"
+  Executing CLIWorkflowStep "CopyStep"
   Command: "/bin/cp" "/etc/mtab" "copiedFile"
+  '/bin/cp' -> 'copiedFile'
 
 The second time it is executed, ``steady`` notes that the input file
-contents have not changed and the output file exists, so it does not
-re-run the pipeline step::
+contents have not changed, the output file exists, and the output file
+has not changed, so it does not re-run the workflow step::
 
-  >>> pipeline.Execute(verbose=True)
+  >>> workflow.Execute(verbose=True)
   Workflow step "CopyStep" is up-to-date.
-
-Notice that the input and output files seem to be listed twice, once
-in the ``inputs``/``outputs`` parameter and once in the ``args``
-parameter. This redundancy is needed because not all executables take
-input and output arguments in the same order, some require inputs and
-outputs to be noted with a flag (e.g., ``--input``) so ``steady``
-doesn't make any assumptions about how to arrange input and output
-files in the arguments list passed to an external executable. However,
-``steady`` still needs to know which files are inputs and outputs, so
-each step needs an explicit list of inputs and outputs.
 
 Now, let's remove the output file and run the workflow again.
 
   >>> os.remove(outputFile)
-  >>> pipeline.Execute(verbose=True)
+  >>> workflow.Execute(verbose=True)
   Workflow step "CopyStep" needs to be executed.
-  Executing CommandLineExecutablePipelineStep "CopyStep"
+  Executing CLIWorkflowStep "CopyStep"
   Command: "/bin/cp" "/etc/mtab" "copiedFile"
 
-``steady`` notes the output file has been remove and re-executes the
-pipeline step. Now, let's change the output file contents::
+The ``steady`` workflow notes the output file has been remove and
+re-executes the pipeline step. Now, let's change the output file
+contents::
 
   >>> with open(outputFile, 'w') as f:
   ...     f.write('changed content')
-  >>> pipeline.Execute(verbose=True)
+  >>> workflow.Execute(verbose=True)
   Workflow step "CopyStep" needs to be executed.
-  Executing CommandLineExecutablePipelineStep "CopyStep"
+  Executing CLIWorkflowStep "CopyStep"
   Command: "/bin/cp" "/etc/mtab" "copiedFile"
 
 Again, ``steady`` notes the output file has been changed since the
 last execution and runs the step again.
-
-As a side note, it is possible to set properties of
-CommandLineExecutablePipelineSteps directly, e.g.::
-
-  >>> copyStep.Executable = '/bin/cp'
-  >>> copyStep.Inputs = [inputFile]
-  >>> copyStep.Outputs = [outputFile]
-  >>> copyStep.Arguments = ['-v', 'P', inputFile, outputFile]
 
 Cache files
 -----------
 
 ``steady`` stores a set of cache files for each pipeline step in a
 cache directory. By default, the cache directory is '/tmp', but you
-can change it globally with ``Pipeline.SetCacheDirectory``::
+can change it globally with ``Workflow.SetCacheDirectory``::
 
-  Pipeline.SetCacheDirectory('/my/cache/directory')
+  Workflow.SetCacheDirectory('/my/cache/directory')
 
 Additional examples
 -------------------
@@ -171,6 +162,6 @@ could be, but it isn't.
 """
 
 import steady.workflow
-from steady.workflow import Pipeline, PipelineStep, CommandLineExecutablePipelineStep
+from steady.workflow import Workflow, WorkflowStep, CLIWorkflowStep
 
 __version__ = '0.5.0'
