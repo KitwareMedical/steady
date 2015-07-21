@@ -3,27 +3,22 @@ import sys
 # Add Python path two levels up
 sys.path.append('../../')
 
-from steady.workflow import *
+from steady import workflow as wf
 
 #############################################################################
 def main():
-    Pipeline.SetCacheDirectory('/home/cory/tmp')
+    wf.Pipeline.SetCacheDirectory('/home/cory/tmp')
 
     # Set up a pipeline
-    p = Pipeline()
+    p = wf.Pipeline()
 
     # Set up some workflow steps
-    c1 = CommandLineExecutablePipelineStep('FirstStep')
-    c1.Executable = '/usr/bin/python'
-    c1.Arguments = ['script1.py', 'script1-input.txt', 'script1-output.txt']
-    c1.InputFiles = ['script1.py', 'script1-input.txt']
-    c1.OutputFiles = ['script1-output.txt']
+    cmd = ['/usr/bin/python', wf.infile('script1.py'), wf.infile('script1-input.txt'), wf.outfile('script1-output.txt')]
+    c1 = wf.CommandLineExecutablePipelineStep('FirstStep', cmd)
     p.AddStep(c1)
 
-    c2 = CommandLineExecutablePipelineStep('SecondStep')
-    c2.Executable = '/usr/bin/python'
-    c2.Arguments = ['script2.py', 'script1-output.txt']
-    c2.InputFiles = c2.Arguments
+    cmd = ['/usr/bin/python', wf.infile('script2.py'), wf.infile('script1-output.txt')]
+    c2 = wf.CommandLineExecutablePipelineStep('SecondStep', cmd)
     p.AddStep(c2)
 
     # Optional argument to force execution of all pipeline steps
