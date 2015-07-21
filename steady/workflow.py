@@ -25,6 +25,7 @@ import sys
 #
 ###############################################################################
 
+
 #############################################################################
 class WorkflowStep(object):
     """Base class for pipeline steps.
@@ -43,7 +44,8 @@ class WorkflowStep(object):
 
 #############################################################################
 class CLIWorkflowStep(WorkflowStep):
-    """Workflow steps for a command-line executable.
+    """Workflow steps for a command-line executable invoked through a
+    command-line interface (CLI).
 
     """
     def __init__(self, name, cmd=[], executable=None, inputs=[], outputs=[], args=[]):
@@ -308,26 +310,34 @@ class Workflow:
 
 
 #############################################################################
-def infile(value):
-    """Mark an argument as an input.
+def infile(arg):
+    """Decorate an argument as an input.
+
+    :parameter arg: Argument to designate as an input file.
 
     """
-    return ('in', value)
+    return ('in', arg)
 
-def infile_hidden(value):
-    """Mark an argument as an input that is not passed as a command-line argument.
+def infile_hidden(arg):
+    """Decorate an argument as an input that is not passed as a command-line argument.
 
-    """
-    return ('in_hidden', value)
-
-def outfile(value):
-    """Mark an argument as an output.
+    :parameter arg: Argument to designate as an input file.
 
     """
-    return ('out', value)
+    return ('in_hidden', arg)
 
-def outfile_hidden(value):
-    """Mark an argument as an output that is not passed as a command-line argument.
+def outfile(arg):
+    """Decorate an argument as an output.
+
+    :parameter arg: Argument to designate as an input file.
 
     """
-    return ('out_hidden', value)
+    return ('out', arg)
+
+def outfile_hidden(arg):
+    """Decorate an argument as an output that is not passed as a command-line argument.
+
+    :parameter arg: Argument to designate as an input file.
+
+    """
+    return ('out_hidden', arg)
