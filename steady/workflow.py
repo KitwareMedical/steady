@@ -46,12 +46,21 @@ class CommandLineExecutablePipelineStep(PipelineStep):
     """Pipeline steps for a command-line executable.
 
     """
-    def __init__(self, name, executable=None, inputs=[], outputs=[], args=[]):
+    def __init__(self, name, cmd=[], executable=None, inputs=[], outputs=[], args=[]):
         super(CommandLineExecutablePipelineStep, self).__init__(name)
         self.Executable = executable
         self.InputFiles = inputs
         self.OutputFiles = outputs
         self.Arguments = args
+
+        if (len(cmd) > 0):
+            self.Executable = cmd[0]
+            inputs = filter(lambda x: x.find('::input::') == 0, cmd)
+            self.InputFiles = [x.replace('::input::', '') for x in inputs]
+            outputs = filter(lambda x: x.find('::output::') == 0, cmd)
+            self.OutputFiles = [x.replace('::output::', '') for x in outputs]
+            args = [x.replace('::input::', '') for x in cmd[1:]]
+            self.Arguments = [x.replace('::output::', '') for x in args]
 
     def Execute(self, verbose=False):
         """Run the pipeline step.
@@ -267,3 +276,17 @@ class Pipeline:
         # Warn if directory doesn't exit
         if (not os.path.isdir(directory)):
             sys.stdout.write('Cache directory "%s" does not exist.\n' % directory)
+
+
+#############################################################################
+def input(value):
+    """Mark an argument as an input.
+
+    """
+    return '::input::' + value
+
+def output(value):
+    """Mark an argument as an output.
+
+    """
+    return '::output::' + value
