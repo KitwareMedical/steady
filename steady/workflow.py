@@ -55,12 +55,37 @@ class CommandLineExecutablePipelineStep(PipelineStep):
 
         if (len(cmd) > 0):
             self.Executable = cmd[0]
-            inputs = filter(lambda x: x.find('::input::') == 0, cmd)
-            self.InputFiles = [x.replace('::input::', '') for x in inputs]
-            outputs = filter(lambda x: x.find('::output::') == 0, cmd)
-            self.OutputFiles = [x.replace('::output::', '') for x in outputs]
-            args = [x.replace('::input::', '') for x in cmd[1:]]
-            self.Arguments = [x.replace('::output::', '') for x in args]
+
+            def replaceAll(s, oldList, new):
+                for old in oldList:
+                    s = s.replace(old, new)
+                return s
+
+            def IsInput(item):
+                return isinstance(item, tuple) and item[0].find('input') == 0
+
+            def IsOutput(item):
+                return isinstance(item, tuple) and item[0].find('output') == 0
+
+            inputs = [x for x in cmd if IsInput(x)]
+            self.InputFiles = [x[1] for x in inputs]
+            outputs = [x for x in cmd if IsOutput(x)]
+            self.OutputFiles = [x[1] for x in outputs]
+
+            def PassThroughArg(arg):
+                isTuple = isinstance(arg, tuple)
+                return not isTuple or (isTuple and arg[0] != 'input_noarg' and arg[0] != 'output_noarg')
+
+            def ArgSelector(arg):
+                if (isinstance(arg, tuple)):
+                    return arg[1]
+                else:
+                    return arg
+
+            passThroughArgs = filter(PassThroughArg, cmd[1:])
+            self.Arguments = [ArgSelector(arg) for arg in passThroughArgs]
+
+            print(self.Arguments)
 
     def Execute(self, verbose=False):
         """Run the pipeline step.
@@ -81,17 +106,17 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         try:
             returnCode = subprocess.call(args)
             if (returnCode != 0):
-              print 'Process returned error code', returnCode
+              print('Process returned error code', returnCode)
               return False
 
         except:
-            print 'Failed to run command-line executable', args
+            print('Failed to run command-line executable', args)
             return False
 
         try:
             self._WriteSHA256Files()
         except:
-            print 'Failed to write SHA 256 files for input'
+            print('Failed to write SHA 256 files for input')
             return False
 
         return True
@@ -125,8 +150,13 @@ class CommandLineExecutablePipelineStep(PipelineStep):
                 newSHA256 = self._ComputeSHA256(inputFileName)
                 if (oldSHA256 != newSHA256):
                     return True
+            except IOError as e:
+                print('I/O error({0}): {1}'.format(e.errno, e.strerror))
+            except UnicodeDecodeError as e:
+                print('UnicodeDecodeError: ', e)
             except:
-                print "Error when comparing SHA256 files. Assuming execution of pipeline step is needed."
+                print("Error when comparing SHA256 files. Assuming execution of pipeline step is needed.")
+                print("Unexpected error: ", sys.exc_info()[0])
                 return True
 
         for outputFile in self.OutputFiles:
@@ -207,6 +237,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
                 sha256Value = self._ComputeSHA256(inputFileName)
             except:
                 sys.stdout.write('Could not compute SHA256 for file "%s"\n' % inputFileName)
+                sys.stdout.write('%s\n' % sys.exc_info()[0])
 
             try:
                 shaFile = open(sha256FileName, 'w')
@@ -283,10 +314,22 @@ def input(value):
     """Mark an argument as an input.
 
     """
-    return '::input::' + value
+    return ('input', value)
+
+def input_noarg(value):
+    """Mark an argument as an input that is not passed as a command-line argument.
+
+    """
+    return ('input_noarg', value)
 
 def output(value):
     """Mark an argument as an output.
 
     """
-    return '::output::' + value
+    return ('output', value)
+
+def output_noarg(value):
+    """Mark an argument as an output that is not passed as a command-line argument.
+
+    """
+    return ('output_noarg', value)
