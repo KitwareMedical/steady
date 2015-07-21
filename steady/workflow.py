@@ -26,10 +26,10 @@ import sys
 ###############################################################################
 
 #############################################################################
-class PipelineStep(object):
+class WorkflowStep(object):
     """Base class for pipeline steps.
 
-    :param name: Name of the PipelineStep. It should be unique.
+    :param name: Name of the WorkflowStep. It should be unique.
 
     """
     def __init__(self, name):
@@ -42,12 +42,12 @@ class PipelineStep(object):
         return False
 
 #############################################################################
-class CommandLineExecutablePipelineStep(PipelineStep):
-    """Pipeline steps for a command-line executable.
+class CLIWorkflowStep(WorkflowStep):
+    """Workflow steps for a command-line executable.
 
     """
     def __init__(self, name, cmd=[], executable=None, inputs=[], outputs=[], args=[]):
-        super(CommandLineExecutablePipelineStep, self).__init__(name)
+        super(CLIWorkflowStep, self).__init__(name)
         self.Executable = executable
         self.InputFiles = inputs
         self.OutputFiles = outputs
@@ -93,7 +93,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         executed. Otherwise, minimize output.
 
         """
-        sys.stdout.write('Executing CommandLineExecutablePipelineStep "%s"\n' % self.Name)
+        sys.stdout.write('Executing CLIWorkflowStep "%s"\n' % self.Name)
         args = [self.Executable] + self.Arguments
 
         if (verbose):
@@ -166,9 +166,9 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         return False
 
     def ClearCache(self):
-        """Deletes all the cached SHA256 files for this PipelineStep.
+        """Deletes all the cached SHA256 files for this WorkflowStep.
 
-        This essentially forces a re-run of the PipelineStep.
+        This essentially forces a re-run of the WorkflowStep.
 
         """
         filesToCheck = [self.Executable]
@@ -184,7 +184,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
         """Get the file name for the cached SHA256 entry.
 
         """
-        fileName = os.path.join(Pipeline._CacheDirectory,
+        fileName = os.path.join(Workflow._CacheDirectory,
                                 self.Name + '-' + fileName.replace('/', '_') + '.sha256')
 
         # Create the path if needed
@@ -245,8 +245,8 @@ class CommandLineExecutablePipelineStep(PipelineStep):
                 sys.stdout.write('Could not write SHA256 file "%s".\n' % sha256FileName)
 
 #############################################################################
-class Pipeline:
-    """Pipeline that defines a set of steps that should be taken to
+class Workflow:
+    """Workflow that defines a set of steps that should be taken to
     execute a workflow.
 
     """
@@ -260,11 +260,11 @@ class Pipeline:
         self._Steps.append(step)
 
     def Execute(self, dryRun=False, verbose=False):
-        """Execute each PipelineStep in the order it was added to the Pipeline
+        """Execute each WorkflowStep in the order it was added to the Workflow
         if needed.
 
-        :parameter dryRun: If set to True, does not actually execute the PipelineStep.
-        :parameter verbose: If set to True, tells the PipelineStep to execute verbosely.
+        :parameter dryRun: If set to True, does not actually execute the WorkflowStep.
+        :parameter verbose: If set to True, tells the WorkflowStep to execute verbosely.
 
         """
         for s in self._Steps:
@@ -279,10 +279,10 @@ class Pipeline:
                 sys.stdout.write('Workflow step "%s" is up-to-date.\n' % s.Name)
 
     def ClearCache(self):
-        """Clear the cache for all steps in the Pipeline.
+        """Clear the cache for all steps in the Workflow.
 
         Note that this will force re-execution of all steps in the
-        Pipeline.
+        Workflow.
 
         """
         sys.stdout.write('Clearing cache\n')
@@ -300,7 +300,7 @@ class Pipeline:
 
         """
         sys.stdout.write('Setting cache directory to "%s"\n' % directory)
-        Pipeline._CacheDirectory = directory
+        Workflow._CacheDirectory = directory
 
         # Warn if directory doesn't exit
         if (not os.path.isdir(directory)):
