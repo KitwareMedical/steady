@@ -62,10 +62,10 @@ class CommandLineExecutablePipelineStep(PipelineStep):
                 return s
 
             def IsInput(item):
-                return isinstance(item, tuple) and item[0].find('input') == 0
+                return isinstance(item, tuple) and item[0].find('in') == 0
 
             def IsOutput(item):
-                return isinstance(item, tuple) and item[0].find('output') == 0
+                return isinstance(item, tuple) and item[0].find('out') == 0
 
             inputs = [x for x in cmd if IsInput(x)]
             self.InputFiles = [x[1] for x in inputs]
@@ -74,7 +74,7 @@ class CommandLineExecutablePipelineStep(PipelineStep):
 
             def PassThroughArg(arg):
                 isTuple = isinstance(arg, tuple)
-                return not isTuple or (isTuple and arg[0] != 'input_noarg' and arg[0] != 'output_noarg')
+                return not isTuple or (isTuple and arg[0] != 'in_hidden' and arg[0] != 'out_hidden')
 
             def ArgSelector(arg):
                 if (isinstance(arg, tuple)):
@@ -84,8 +84,6 @@ class CommandLineExecutablePipelineStep(PipelineStep):
 
             passThroughArgs = filter(PassThroughArg, cmd[1:])
             self.Arguments = [ArgSelector(arg) for arg in passThroughArgs]
-
-            print(self.Arguments)
 
     def Execute(self, verbose=False):
         """Run the pipeline step.
@@ -310,26 +308,26 @@ class Pipeline:
 
 
 #############################################################################
-def input(value):
+def infile(value):
     """Mark an argument as an input.
 
     """
-    return ('input', value)
+    return ('in', value)
 
-def input_noarg(value):
+def infile_hidden(value):
     """Mark an argument as an input that is not passed as a command-line argument.
 
     """
-    return ('input_noarg', value)
+    return ('in_hidden', value)
 
-def output(value):
+def outfile(value):
     """Mark an argument as an output.
 
     """
-    return ('output', value)
+    return ('out', value)
 
-def output_noarg(value):
+def outfile_hidden(value):
     """Mark an argument as an output that is not passed as a command-line argument.
 
     """
-    return ('output_noarg', value)
+    return ('out_hidden', value)
