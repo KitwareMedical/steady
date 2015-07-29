@@ -72,10 +72,8 @@ step::
 
   from steady import workflow as wf
 
-  inputFile = '/etc/mtab'
-  outputFile = 'copiedFile'
-  command = ['/bin/cp', '-v', 'P', wf.infile(inputFile), wf.outfile(outputFile)]
-  copyStep = wf.CLIWorkflowStep('CopyStep', cmd)
+  command = ['/bin/cp', '-v', '-P', wf.infile('/etc/mtab'), wf.outfile('copiedFile')]
+  copyStep = wf.CLIWorkflowStep('CopyStep', command)
 
   workflow = wf.Workflow([copyStep])
 
@@ -89,7 +87,7 @@ respectively. These functions decorate the arguments to indicate that
 they represent input and output files and that the workflow should pay
 special attention to them. Aside from this decoration of input and
 output files, arguments to command-line executables are in the same
-form passed to ``subprocess.call()``.
+list format passed to ``subprocess.call()``.
 
 Let's see what happens the first time ``Execute`` is called on
 the workflow::
@@ -109,17 +107,17 @@ has not changed, so it does not re-run the workflow step::
 
 Now, let's remove the output file and run the workflow again.
 
-  >>> os.remove(outputFile)
+  >>> os.remove('copiedFile')
   >>> workflow.Execute(verbose=True)
   Workflow step "CopyStep" needs to be executed.
   Executing CLIWorkflowStep "CopyStep"
   Command: "/bin/cp" "/etc/mtab" "copiedFile"
 
 The ``steady`` workflow notes the output file has been remove and
-re-executes the pipeline step. Now, let's change the output file
+re-executes the workflow step. Now, let's change the output file
 contents::
 
-  >>> with open(outputFile, 'w') as f:
+  >>> with open('copiedFile', 'w') as f:
   ...     f.write('changed content')
   >>> workflow.Execute(verbose=True)
   Workflow step "CopyStep" needs to be executed.
@@ -127,34 +125,44 @@ contents::
   Command: "/bin/cp" "/etc/mtab" "copiedFile"
 
 Again, ``steady`` notes the output file has been changed since the
-last execution and runs the step again.
+last execution and re-runs the step.
 
 Cache files
 -----------
 
-``steady`` stores a set of cache files for each pipeline step in a
+``steady`` stores a set of cache files for each workflow step in a
 cache directory. By default, the cache directory is '/tmp', but you
 can change it globally with ``Workflow.SetCacheDirectory``::
 
   Workflow.SetCacheDirectory('/my/cache/directory')
+
+License
+-------
+
+``steady`` is licensed under the Apache 2.0 License. See the
+COPYRIGHT.rst file in the top level of the source code.
+
+Obtaining the source code
+-------------------------
+
+The latest source code is available at
+https://github.com/KitwareMedical/steady.
 
 Additional examples
 -------------------
 
 Some additional examples are located in the Examples directory.
 
+Acknowledgements
+----------------
+
+``steady`` was developed with funding from NIH grant #5R01HL105241-04.
+
 FAQ
 ---
 
-**Q**: Why do I need to list the inputs, outputs, and arguments
-saparately when the arguments are the inputs and outputs?
-
-**A**: Your external process may take arguments besides input and
-output files, and it may require the input argument(s) and output
-argument(s) to be listed in a specific order.
-
 **Q**: If I change an argument that is not an input or an output, the
-pipeline step is not rerun. Why not?
+workflow step is not rerun. Why not?
 
 **A**: No hashing and caching of command-line arguments is done. It
 could be, but it isn't.
