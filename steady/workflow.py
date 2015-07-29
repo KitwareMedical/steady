@@ -110,7 +110,7 @@ class CLIWorkflowStep(WorkflowStep):
               return False
 
         except:
-            print('Failed to run command-line executable', args)
+            print('Failed to run command-line executable %s' % args)
             return False
 
         try:
