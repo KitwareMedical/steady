@@ -27,3 +27,9 @@ The key feature of this system is that workflow steps are executed
   since the last update;
 
 * when the external executable has changed.
+
+Acknowledgements
+----------------
+
+This project was supported by Grant Number R01HL105241 from the
+National Heart, Lung, And Blood Institute.
