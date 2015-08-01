@@ -5,7 +5,7 @@
 #
 # Library: steady
 #
-# Copyright 2010 Kitware, Inc., 28 Corporate Dr., Clifton Park, NY 12065, USA.
+# Copyright 2015 Kitware, Inc., 28 Corporate Dr., Clifton Park, NY 12065, USA.
 # All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 packages = ['steady']
-requires = ['requests']
+requires = []
 
 setup(name='steady',
       version='0.5.0',
@@ -41,7 +41,7 @@ setup(name='steady',
       long_description=open('../README.rst').read(),
       author='Cory Quammen',
       author_email='cory.quammen@kitware.com',
-      url='http://github.com/midasplatform/pydas',
+      url='http://github.com/KitwareMedical/steady',
       packages=packages,
       install_requires=requires,
       license='Apache 2.0',
@@ -54,8 +54,5 @@ setup(name='steady',
           'Programming Language :: Python',
           'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
-          'Programming Language :: Python :: 3.2',
-          'Programming Language :: Python :: 3.3',
-          'Programming Language :: Python :: 3.4',
       ),
       )
