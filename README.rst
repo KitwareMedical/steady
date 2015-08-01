@@ -1,3 +1,6 @@
+steady
+======
+
 ``steady`` is a simple workflow package for Python. It is useful when
 you have a series of processing steps to perform on data sets, and
 each processing step is in the form of a command-line executable.
